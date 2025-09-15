@@ -1,35 +1,4 @@
-;;; init.el --- Emacs Writing Studio init -*- lexical-binding: t; -*-
-
-;; Copyright (C) 2024 Peter Prevos
-
-;; Author: Peter Prevos <peter@prevos.net>
-;; Maintainer: Peter Prevos <peter@prevos.net>
-;; URL: https://github.com/pprevos/emacs-writing-studio/
-;;
-;; This file is NOT part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-;; GNU General Public License for more details.
-;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program. If not, see <https://www.gnu.org/licenses/>.
-;;
-;;; Commentary:
-;;
-;; Emacs Writing Studio init file
-;; https://lucidmanager.org/tags/emacs
-;;
-;; This init file is tangled from the Org mode source:
-;; documents/ews-book/99-appendix.org
-;;
-;;; Code:
+(setq inhibit-startup-message t)
 
 ;; Emacs 29? EWS leverages functionality from the latest Emacs version.
 
@@ -39,19 +8,56 @@
 ;; Custom settings in a separate file and load the custom settings
 
 (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
-
 (when (file-exists-p custom-file)
   (load custom-file))
 
 (keymap-global-set "C-c w v" 'customise-variable)
 
+;; Display line numbers
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+(add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
+
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(use-package all-the-icons
+  :ensure t)
+  ;; bdf fonts
+  (add-to-list 'bdf-directory-list "/usr/local/share/emacs/fonts/bdf")
+
+;; helpful replaces the default emacs help docs
+(use-package helpful
+  :ensure t
+  :custom
+(counsel-describe-function-function #'helpful-callable)
+(counsel-describe-variable-function #'helpful-variable)
+:bind
+([remap describe-function] . counsel-describe-function)
+([remap describe-command] . helpful-command)
+([remap describe-variable] . counsel-describe-variable)
+([remap describe-key] . helpful-key))
+
+(org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+
+  (setenv "PATH" (concat (getenv "PATH") ":/Users/fiend/mambaforge/bin"))
+(add-to-list 'exec-path "/Users/fiend/mambaforge/bin")
+
+(setq python-shell-interpreter "ipython"
+	python-shell-interpreter-args "-i --simple-prompt")
+
 ;; Set package archives
 
 (use-package package
-  :config
-  (add-to-list 'package-archives
-               '("melpa" . "https://melpa.org/packages/"))
-  (package-initialize))
+    :config
+    
+(require 'package)
+
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("org"   . "https://orgmode.org/elpa/") t)
+(add-to-list 'package-archives '("elpa"  . "https://elpa.gnu.org/packages/") t))
 
 ;; Package Management
 
@@ -60,6 +66,16 @@
   (use-package-always-ensure t)
   (package-native-compile t)
   (warning-minimum-level :emergency))
+
+;; fiend - setting preference for melpa 
+(setq package-archive-priorities '(("melpa"  . 100)
+				   ("gnu"    . 50)
+				   ("nongnu" . 0)))
+
+(package-initialize)
+
+(unless package-archive-contents
+(package-refresh-contents))
 
 ;; Load EWS functions
 
@@ -72,7 +88,8 @@
 ;; - pdftotext (poppler-utils): Convert PDF to text
 ;; - ddjvu (DjVuLibre): View DjVu files
 ;; - curl: Reading RSS feeds
-;; - convert (ImageMagick) or gm (GraphicsMagick): Convert image files  ;; - latex (TexLive, MacTex or MikTeX): Preview LaTex and export Org to PDF
+;; - convert (ImageMagick) or gm (GraphicsMagick): Convert image files 
+;; - latex (TexLive, MacTex or MikTeX): Preview LaTex and export Org to PDF
 ;; - hunspell: Spellcheck. Also requires a hunspell dictionary
 ;; - grep: Search inside files
 ;; - gs (GhostScript) or mutool (MuPDF): View PDF files
@@ -92,6 +109,10 @@
    ("gs" "mutool")
    ("mpg321" "ogg123" "mplayer" "mpv" "vlc")
    "git"))
+
+(use-package swiper
+  :ensure t
+  :bind (("C-s" . swiper)))
 
 ;;; LOOK AND FEEL
 
@@ -113,25 +134,11 @@
 
 ;; Modus Themes
 
-(use-package modus-themes
-  :custom
-  (modus-themes-italic-constructs t)
-  (modus-themes-bold-constructs t)
-  (modus-themes-mixed-fonts t)
-  (modus-themes-to-toggle
-   '(modus-operandi-tinted modus-vivendi-tinted))
-  :init
-  (load-theme 'modus-operandi-tinted :no-confirm)
-  :bind
-  (("C-c w t t" . modus-themes-toggle)
-   ("C-c w t m" . modus-themes-select)
-   ("C-c w t s" . consult-theme)))
-
 ;; Mixed-pich mode
 
 (use-package mixed-pitch
   :hook
-  (org-mode . mixed-pitch-mode))
+  (text-mode . mixed-pitch-mode))
 
 ;; Window management
 ;; Split windows sensibly
@@ -178,22 +185,14 @@
 
 ;; Improve keyboard shortcut discoverability
 
-(use-package which-key
-  :config
-  (which-key-mode)
-  :custom
-  (which-key-max-description-length 40)
-  (which-key-lighter nil)
-  (which-key-sort-order 'which-key-description-order))
-
 ;; Improved help buffers
 
 (use-package helpful
-  :bind
-  (("C-h f" . helpful-function)
-   ("C-h x" . helpful-command)
-   ("C-h k" . helpful-key)
-   ("C-h v" . helpful-variable)))
+   :bind
+   (("C-h f" . helpful-function)
+    ("C-h x" . helpful-command)
+    ("C-h k" . helpful-key)
+    ("C-h v" . helpful-variable)))
 
 ;;; Text mode settings
 
@@ -211,20 +210,12 @@
 
 ;; Check spelling with flyspell and hunspell
 
-(use-package flyspell
-  :custom
-  (ispell-program-name "hunspell")
-  (ispell-dictionary ews-hunspell-dictionaries)
-  (flyspell-mark-duplications-flag nil) ;; Writegood mode does this
-  (org-fold-core-style 'overlays) ;; Fix Org mode bug
-  :config
-  (ispell-set-spellchecker-params)
-  (ispell-hunspell-add-multi-dic ews-hunspell-dictionaries)
-  :hook
-  (text-mode . flyspell-mode)
-  :bind
-  (("C-c w s s" . ispell)
-   ("C-;"       . flyspell-auto-correct-previous-word)))
+(use-package spell-fu
+:hook
+((text-mode . spell-fu-mode)
+ (prog-mode . spell-fu-mode))
+:config
+(setq spell-fu-idle-delay 0.5))
 
 ;;; Ricing Org mode
 
@@ -295,6 +286,22 @@
   (doc-view-resolution 300)
   (large-file-warning-threshold (* 50 (expt 2 20))))
 
+;; PDF Tools (better PDF viewing than DocView)
+
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  (setq pdf-view-display-size 'fit-page)
+  ;; Evil-mode keybindings for PDF navigation
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal pdf-view-mode-map
+      (kbd "n") 'pdf-view-next-page
+      (kbd "p") 'pdf-view-previous-page
+      (kbd "j") 'pdf-view-next-line-or-next-page
+      (kbd "k") 'pdf-view-previous-line-or-previous-page
+      (kbd "gg") 'pdf-view-first-page
+      (kbd "G") 'pdf-view-last-page)))
+
 ;; Read ePub files
 
 (use-package nov
@@ -313,7 +320,12 @@
                '("\\.\\(?:OD[CFIGPST]\\|od[cfigpst]\\)\\'"
                  . doc-view-mode-maybe)))
 
+;;open org links to pdfs in emacs
+(setq org-file-apps
+    '(("\\.pdf\\'" . find-file)))
+
 ;; Managing Bibliographies
+(setq ews-bibtex-files '("~/jdp/denote-lib/reading_list.bib"))
 
 (use-package bibtex
   :custom
@@ -328,7 +340,7 @@
 
 ;; Biblio package for adding BibTeX records
 
-(use-package biblio
+(use-package biblioq
   :bind
   (("C-c w b b" . ews-bibtex-biblio-lookup)))
 
@@ -394,26 +406,34 @@
 ;; Fleeting notes
 
 (use-package org
-  :bind
-  (("C-c c" . org-capture)
-   ("C-c l" . org-store-link))
   :custom
+  (org-default-notes-file "~/acropolis/inbox.org")
+  (org-agenda-files
+ '("~/jdp/readme.org"
+   "~/jdp/conferences.org"
+   "~/jdp/advising.org"
+   "~/jdp/geog780/780.org"
+   "~/acropolis/inbox.org"
+   "~/acropolis/readme.org"
+   "~/acropolis/personal/records/content.org"
+   "~/acropolis/personal/media/movies.org"
+   "~/acropolis/personal/records/finances.org"
+   "~/acropolis/big_picture.org"))
+  ;:bind
+  ;(("C-c c" . org-capture)
+  ; ("C-c l" . org-store-link))
+:custom
   (org-goto-interface 'outline-path-completion)
   (org-capture-templates
-   '(("f" "Fleeting note"
-      item
-      (file+headline org-default-notes-file "Notes")
-      "- %?")
-     ("p" "Permanent note" plain
-      (file denote-last-path)
-      #'denote-org-capture
-      :no-save t
-      :immediate-finish nil
-      :kill-buffer t
-      :jump-to-captured t)
-     ("t" "New task" entry
-      (file+headline org-default-notes-file "Tasks")
-      "* TODO %i%?"))))
+ '(("j" "JDP" entry
+    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in JDP")
+    "** TODO %?")
+   ("a" "Acropolis" entry
+    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in Acropolis")
+    "** TODO %?")))
+(org-todo-keywords
+ '((sequence "TASK(a)" "TODO(t)" "NEXT(n)" "IDEA(i)" "|" "DONE(d)")
+   (sequence "HOLD(h)" "WAITING(w)" "DEADLINE(D)" "|" "CANCELLED(c)"))))
 
 ;; Denote
 
@@ -421,7 +441,6 @@
   :defer t
   :custom
   (denote-sort-keywords t)
-  (denote-link-description-function #'ews-denote-link-description-title-case)
   :hook
   (dired-mode . denote-dired-mode)
   :custom-face
@@ -431,12 +450,12 @@
   :bind
   (("C-c w d b" . denote-find-backlink)
    ("C-c w d d" . denote-date)
-   ("C-c w d l" . denote-find-link)
+   ("C-c w d f" . denote-find-link)
    ("C-c w d h" . denote-org-extras-link-to-heading)
    ("C-c w d i" . denote-link-or-create)
    ("C-c w d k" . denote-rename-file-keywords)
    ("C-c w d l" . denote-insert-link)
-   ("C-c w d n" . denote)
+   ("C-c w d n" . denote-subdirectory)
    ("C-c w d r" . denote-rename-file)
    ("C-c w d R" . denote-rename-file-using-front-matter)))
 
@@ -444,7 +463,7 @@
 
 (use-package consult-notes
   :bind
-  (("C-c w d f" . consult-notes)
+  (("C-c w f"   . consult-notes)
    ("C-c w d g" . consult-notes-search-in-all-notes))
   :init
   (consult-notes-denote-mode))
@@ -525,7 +544,12 @@
 (setq org-cite-global-bibliography ews-bibtex-files
       org-cite-insert-processor 'citar
       org-cite-follow-processor 'citar
-      org-cite-activate-processor 'citar)
+      org-cite-activate-processor 'citar
+      
+;; Always use natbib + chicago-doi for LaTeX export
+      org-cite-export-processors
+      '((latex natbib "chicago-doi")
+        (t basic)))
 
 ;; Lookup words in the online dictionary
 
@@ -628,7 +652,7 @@
   (add-to-list
    'org-latex-classes
    '("ews"
-     "\\documentclass[11pt, twoside, hidelinks]{memoir}
+     "\\documentclass[11pt, twoside]{memoir}
       \\setstocksize{9.25in}{7.5in}
       \\settrimmedsize{\\stockheight}{\\stockwidth}{*}
       \\setlrmarginsandblock{2cm}{1cm}{*} 
@@ -642,8 +666,6 @@
       \\setsecheadstyle{\\normalfont \\raggedright \\textbf}
       \\setsubsecheadstyle{\\normalfont \\raggedright \\textbf}
       \\setsubsubsecheadstyle{\\normalfont\\centering}
-      \\renewcommand\\texttt[1]{{\\normalfont\\fontfamily{cmvtt}
-        \\selectfont #1}}
       \\usepackage[font={small, it}]{caption}
       \\pagestyle{myheadings}
       \\usepackage{ccicons}
@@ -667,24 +689,28 @@
                    (org-agenda-span 3)
                    (org-agenda-start-on-weekday nil)))
        (todo "NEXT" ((org-agenda-overriding-header "Next Actions:")))
-       (todo "WAIT" ((org-agenda-overriding-header "Waiting:")))))))
+       (todo "WAITING" ((org-agenda-overriding-header "Waiting:")))))))
   :bind
   (("C-c a" . org-agenda)))
 
 ;; FILE MANAGEMENT
 
-(use-package dired
-  :ensure
-  nil
-  :commands
-  (dired dired-jump)
-  :custom
-  (dired-listing-switches
-   "-goah --group-directories-first --time-style=long-iso")
-  (dired-dwim-target t)
-  (delete-by-moving-to-trash t)
-  :init
-  (put 'dired-find-alternate-file 'disabled nil))
+;; Enable GNU ls if installed
+(when (executable-find "gls")
+  (setq insert-directory-program "gls"))
+  
+  (use-package dired
+    :ensure
+    nil
+    :commands
+    (dired dired-jump)
+    :custom
+    (dired-listing-switches
+     "-goah --group-directories-first --time-style=long-iso")
+    (dired-dwim-target t)
+    (delete-by-moving-to-trash t)
+    :init
+    (put 'dired-find-alternate-file 'disabled nil))
 
 ;; Hide hidden files
 
@@ -748,3 +774,181 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((dot . t))) ; this line activates GraophViz dot
+
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-keybinding nil)
+  (setq evil-want-integration t)
+  :config
+  (evil-mode 1)
+  (evil-define-key 'insert evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (evil-define-key 'insert evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-commentary
+:ensure t
+:after evil
+:bind (:map evil-normal-state-map
+  ("gc" . evil-commentary))) 
+
+;evil collection enables evil keybindings globally
+(use-package evil-collection
+:after evil
+:config
+(evil-collection-init))
+
+;; need this to make evil-undo work
+(use-package undo-tree
+:ensure t
+:after evil
+:diminish
+:config
+(evil-set-undo-system 'undo-tree)
+(global-undo-tree-mode 1))
+
+(use-package magit
+  :ensure t)
+
+(use-package general
+  :ensure t
+  :after evil
+  :config
+  (general-evil-setup t)
+
+  (general-create-definer fiend/leader-keys
+    :states '(normal visual motion emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  ;; Leader bindings go here 
+  (fiend/leader-keys
+    "t"  '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose theme")
+    "w"  '(evil-window-map :which-key "window")
+    "."  '(counsel-find-file :which-key "find file")
+    "RET" '(bookmark-bmenu-list :which-key "bookmarks")
+    "o" '(org-agenda :which-key "agenda")
+    "d" '(dired :which-key "dired")
+    "g" '(magit-status :which-key "magit")
+    "ts" '(hydra-text-scale/body :which-key "scale text")
+    "o"  '(hydra-org/body :which-key "org")
+    "f" '(hydra-file/body :which-key "file"))
+
+        (defun fiend/evil-hook ()
+        (dolist (mode '(custom-mode
+        	eshell-mode
+        	git-rebase-mode
+        	erc-mode
+        	circe-server-mode
+        	circe-chat-mode
+        	circe-query-mode
+        	sauron-mode
+        	term-mode))
+        (add-to-list 'evil-emacs-state-modes mode))))
+
+;; Ivy provides some improved functionality for certain commands
+   (use-package ivy
+   :config (ivy-mode 1)
+   :bind (("C-s" . swiper)
+   :map ivy-minibuffer-map
+   ("TAB" . ivy-alt-done)
+   ("C-l" . ivy-alt-done)
+   ("C-j" . ivy-next-line)
+   ("C-k" . ivy-previous-line)
+   :map ivy-switch-buffer-map
+   ("C-k" . ivy-previous-line)
+   ("C-l" . ivy-done)
+   ("C-d" . ivy-switch-buffer-kill)
+   :map ivy-reverse-i-search-map
+   ("C-k" . ivy-previous-line)
+   ("C-d" . ivy-reverse-i-search-kill)))
+
+   ;; ivy rich gives details and keybindings in the command buffer
+   (use-package ivy-rich
+   :init
+   (ivy-rich-mode 1))
+
+  ;; AMX tracks the history of commands and ranks them
+  (use-package amx
+    :ensure t
+    :after ivy
+    :custom
+    (amx-backend 'auto)
+    (amx-save-file "~/.emacs.d/amx-items")
+    (amx-history-length 50)
+    (amx-show-keybindings nil)
+    :config
+    (amx-mode 1))
+
+   ;; counsel has some functionality wth ivy
+   (use-package counsel
+   :bind (("M-x" . counsel-M-x)
+   ("C-x b" . counsel-ibuffer)
+   ("C-x C-f" . counsel-find-file)
+   :map minibuffer-local-map
+   ("C-r" . 'counsel-minibuffer-history)))
+
+  ;; reposition ivy's window inside an emacs frame. adjust properties of frames
+  (use-package ivy-posframe
+  :ensure t
+  :delight
+  :custom
+  (ivy-posframe-height-alist
+    '((swiper . 15)
+    (t . 10)))
+  (ivy-posframe-display-functions-alist
+    '((complete-symbol . ivy-posframe-display-at-point)
+      (counsel-describe-function . nil)
+      (counsel-describe-variable . nil)
+      (swiper . nil)
+      (swiper-isearch . nil)
+      (t . ivy-posframe-display-at-frame-center)))
+   :config
+   (ivy-posframe-mode 1))
+
+(setq ivy-posframe-parameters
+      '((left-fringe . 8)
+        (right-fringe . 8)))
+
+(use-package hydra)
+
+ ;; Resize text function
+ (defhydra hydra-text-scale (:timeout 4)
+ "scale text"
+ ("j" text-scale-increase "in")
+ ("k" text-scale-decrease "out")
+ ("f" nil "finished" :exit t))
+
+;; Org agenda split
+ (defhydra hydra-org (:timeout 4)
+ "org agenda"
+ ("c" org-capture "capture")
+ ("a" org-agenda "agenda"))
+
+ ;; Org file split
+ (defhydra hydra-file (:timeout 4)
+ "file"
+ ("r" counsel-recentf "recent")
+ ("s" save-buffer "save")
+ ("." find-file "find"))
+
+(use-package dashboard
+  :ensure t
+  :init
+  (setq dashboard-banner-logo-title "SEE YOU SPACE COWBOY")
+  (setq dashboard-startup-banner "~/.emacs.d/gengar.png") ;; path to your image
+  (setq dashboard-center-content t)
+  ;; This makes dashboard the startup buffer
+  (setq dashboard-items '((recents . 5)
+                        (agenda  . 7)))
+  :config
+  (dashboard-setup-startup-hook))
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (switch-to-buffer "*dashboard*")))

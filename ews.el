@@ -34,11 +34,6 @@
 
 ;; Emacs Writing Studio Customisation
 
-(defgroup ews ()
-  "Emacs Writing Studio."
-  :group 'files
-  :link '(url-link :tag "Homepage" "https://lucidmanager.org/tags/emacs/"))
-
 (defcustom ews-bibtex-directory
   (concat (file-name-as-directory (getenv "HOME")) "library")
   "Location of BibTeX files and attachments."
@@ -51,10 +46,10 @@
   :group 'ews
   :type 'list)
 
-(defcustom ews-hunspell-dictionaries "en_AU"
+(defcustom ews-hunspell-dictionaries "en_US"
   "Comma-separated list of Hunspell dictionaries."
   :group 'ews
-  :type 'list)
+  :type 'string)
 
 (defcustom ews-org-completed-action "DONE"
   "Completed action that triggers resetting checkboxes for recurring tasks."
@@ -88,7 +83,7 @@ Sublists indicate that one of the entries is required."
 ;;; BIBLIOGRAPHY
 (defvar ews-bibtex-files
   (when (file-exists-p ews-bibtex-directory)
-    (directory-files ews-bibtex-directory t "^[A-Z|a-z|0-9].+.bib$"))
+    (directory-files ews-bibtex-directory t ews-bibtex-files))
   "List of BibTeX files. Use `ews-bibtex-register` to configure.")
 
 ;;;###autoload
@@ -98,7 +93,7 @@ Use when adding or removing a BibTeX file from or to `ews-bibtex-directory`."
   (interactive)
   (when (file-exists-p ews-bibtex-directory)
     (let ((bib-files (directory-files ews-bibtex-directory t
-				      "^[A-Z|a-z|0-9].+.bib$")))
+				      "^[[:alnum:]_].*\\.bib$")))
       (setq ews-bibtex-files bib-files
   	    org-cite-global-bibliography bib-files
 	    citar-bibliography bib-files)))
@@ -315,9 +310,13 @@ Customise `titlecase-style' for styling."
        (let* ((heading (substring-no-properties (org-get-heading t t t t)))
 	      (level (org-current-level))
 	      (heading-lower (downcase heading))
-              (new-heading (titlecase--string heading-lower style)))
+              (new-heading (titlecase-string heading-lower style)))
 	 (when (<= level (or ews-org-heading-level-capitalise 999))
 	   (org-edit-headline new-heading)))))))
+
+(defun fiend-simple-titlecase (s)
+  "Return a simple title-cased version of string S. Ugh this library"
+  (mapconcat #'capitalize (split-string s) " "))
 
 (defun ews-denote-link-description-title-case (file)
   "Return link description for FILE.
@@ -334,5 +333,5 @@ This function is useful as the value of `denote-link-description-function'."
          (region-text (denote--get-active-region-content)))
     (cond
      (region-text region-text)
-     (title (format "%s" (titlecase--string clean-title titlecase-style)))
+   (title (fiend-simple-titlecase clean-title))
      (t ""))))
