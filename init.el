@@ -1,4 +1,5 @@
 (setq inhibit-startup-message t)
+(setq ns-use-native-fullscreen nil) ; fixes tooltip popup bug
 
 ;; Emacs 29? EWS leverages functionality from the latest Emacs version.
 
@@ -629,6 +630,9 @@
 
 ;; LaTeX PDF Export settings
 
+(require 'ox)          ;; Core Org export framework
+(require 'ox-beamer)   ;; Beamer backend (Org -> LaTeX Beamer)
+
 (use-package ox-latex
   :ensure nil
   :demand t
@@ -645,6 +649,33 @@
            "toc" "nav" "snm" "vrb" "dvi" "fdb_latexmk"
            "blg" "brf" "fls" "entoc" "ps" "spl" "bbl"
            "tex" "bcf"))))
+
+;; dark mode (via srey)
+  (use-package pdf-tools
+    :defer t
+    :config
+    (pdf-tools-install :no-query)
+    (add-hook 'pdf-view-mode-hook #'my/pdf-dark-mode-by-time)
+    (define-key pdf-view-mode-map (kbd "M-d") #'pdf-view-midnight-minor-mode))
+
+  ;; Custom function for dark PDF mode
+(defun my/pdf-dark-mode-by-time ()
+(let* ((hour (string-to-number (format-time-string "%H")))
+       (night (or (< hour 7) (>= hour 18))))
+  (setq-local pdf-view-midnight-colors '("#f8f8f2" . "#282a36"))
+  (message "[pdf-dark] hour=%s night=%s tz=%s" hour night (format-time-string "%Z"))
+  (pdf-view-midnight-minor-mode (if night 1 -1))))
+
+
+(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+      TeX-source-correlate-start-server t)
+
+;; Optional: use C-c C-v to open PDF in same window
+(add-hook 'TeX-after-compilation-finished-functions
+          #'TeX-revert-document-buffer)
+
+;;sync - click in the pdf to return to the spot in the org file
+(setq TeX-command-extra-options "-shell-escape -synctex=1")
 
 ;; EWS paperback configuration
 
@@ -774,6 +805,10 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((dot . t))) ; this line activates GraophViz dot
+
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(setq display-line-numbers-type 'relative
+    display-line-numbers-width 3)
 
 (use-package evil
   :ensure t
