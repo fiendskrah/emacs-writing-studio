@@ -265,10 +265,6 @@ Read the Modus Themes package manual for details with =C-h R modus=.
 
 #+begin_src elisp :exports none
   ;; Modus Themes
-
-#+end_src
-
-#+Begin_src
   (use-package modus-themes
     :custom
     (modus-themes-italic-constructs t)
@@ -360,30 +356,13 @@ EWS uses the Vertico-Orderless-Marginalia stack of minibuffer completion package
 *** Keyboard shortcuts menu
 The Which Key package improves the discoverability of keyboard shortcuts with a popup in the minibuffer. The columns are widened a bit to prevent truncated function names. Due to the naming conventions in Emacs, most functions start with the package name, so some can be long. The problem is that the most interesting part of a function name is at the end of the string, so we don't want that to be hidden. This configuration also instructs Which Key to order the list by function name rather than by key. When using this menu, I am usually looking for a particular function.
 
-#+begin_src
+#+begin_src elisp
   (use-package which-key
     :ensure t
     :config
     (which-key-mode 1)
-    (setq which-key-idle-delay 0.4)
-    (which-key-setup-side-window-bottom))
+    (setq which-key-idle-delay 0.2))
 #+end_src
-
-
-#+begin_src elisp :exports none
-  ;; Improve keyboard shortcut discoverability
-#+end_src
-
-  (use-package which-key
-    :ensure t
-    :diminish which-key-mode
-    :init
-    (which-key-mode)
-    :custom
-    (which-key-idle-delay 0.3)
-    (which-key-max-description-length 40)
-    (which-key-lighter nil)
-    (which-key-sort-order 'which-key-description-order))
 
 *** Improved help functionality
 
@@ -432,12 +411,12 @@ I have replaced flyspell with a package called spell-fu - flyspell was causing i
   ;; Check spelling with flyspell and hunspell
 #+end_src
 #+begin_src elisp
-  (use-package spell-fu
-  :hook
-  ((text-mode . spell-fu-mode)
-   (prog-mode . spell-fu-mode))
-  :config
-  (setq spell-fu-idle-delay 0.5))
+  ;(use-package spell-fu
+  ;:hook
+  ;((text-mode . spell-fu-mode)
+  ; (prog-mode . spell-fu-mode))
+  ;:config
+  ;(setq spell-fu-idle-delay 0.5))
 #+end_src
 
 
@@ -609,11 +588,12 @@ A confirmed bug in Org mode (version 9.6.15) overrides the associations between 
 These lines of code add two field types to BibTeX entries: keywords to help you order your literature and a link to a file so you can read any attachments in Emacs. The ~ews-register-bibtex~ function assigns all =.bib= files in the ~ews-bibliography-directory~ variable to the list of global BibTeX files. You need to set this variable to the location where you store your bibliography and restart Emacs if required. Section [[#sec-bib]] explains creating and managing a bibliography.
 
 #+begin_src elisp :exports none
-  ;; Managing Bibliographies
-(setq ews-bibtex-files '("~/jdp/denote-lib/reading_list.bib"))
+      ;; Managing Bibliographies
+(setq ews-bibtex-directory (expand-file-name "~/jdp/denote-lib/")
+      ews-bibtex-files "\\.bib\\'")   ;; regexp, not a list
 #+end_src
 
-
+      
 #+begin_src elisp
   (use-package bibtex
     :custom
@@ -755,10 +735,13 @@ The possibilities for capture templates are extensive and depend on your use cas
     (org-goto-interface 'outline-path-completion)
     (org-capture-templates
    '(("j" "JDP" entry
-      (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in JDP")
+      (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "JDP")
       "** TODO %?")
      ("a" "Acropolis" entry
-      (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in Acropolis")
+      (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Acropolis")
+      "** TODO %?")
+     ("e" "Emacs" entry
+      (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Emacs")
       "** TODO %?")))
   (org-todo-keywords
    '((sequence "TASK(a)" "TODO(t)" "NEXT(n)" "IDEA(i)" "|" "DONE(d)")
@@ -1540,12 +1523,11 @@ How could I not use elements of DOOM?
 (setq doom-modeline-buffer-file-name-style 'auto)
 (setq doom-modeline-icon t))
 
-#+Begin_src
   (use-package doom-themes
   :ensure t
   :config)
-  
   (load-theme 'doom-one t)
+#+Begin_src elisp
 #+end_src
 
 ** DASHBOARD

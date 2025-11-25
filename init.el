@@ -134,6 +134,11 @@
   (spacious-padding-mode 1))
 
 ;; Modus Themes
+(use-package modus-themes
+  :custom
+  (modus-themes-italic-constructs t)
+  (modus-themes-bold-constructs t)
+  (modus-themes-mixed-fonts t))
 
 ;; Mixed-pich mode
 
@@ -184,7 +189,11 @@
   :init
   (marginalia-mode))
 
-;; Improve keyboard shortcut discoverability
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode 1)
+  (setq which-key-idle-delay 0.2))
 
 ;; Improved help buffers
 
@@ -211,12 +220,12 @@
 
 ;; Check spelling with flyspell and hunspell
 
-(use-package spell-fu
-:hook
-((text-mode . spell-fu-mode)
- (prog-mode . spell-fu-mode))
-:config
-(setq spell-fu-idle-delay 0.5))
+;(use-package spell-fu
+;:hook
+;((text-mode . spell-fu-mode)
+; (prog-mode . spell-fu-mode))
+;:config
+;(setq spell-fu-idle-delay 0.5))
 
 ;;; Ricing Org mode
 
@@ -326,7 +335,8 @@
     '(("\\.pdf\\'" . find-file)))
 
 ;; Managing Bibliographies
-(setq ews-bibtex-files '("~/jdp/denote-lib/reading_list.bib"))
+(setq ews-bibtex-directory (expand-file-name "~/jdp/denote-lib/")
+      ews-bibtex-files "\\.bib\\'")   ;; regexp, not a list
 
 (use-package bibtex
   :custom
@@ -427,10 +437,13 @@
   (org-goto-interface 'outline-path-completion)
   (org-capture-templates
  '(("j" "JDP" entry
-    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in JDP")
+    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "JDP")
     "** TODO %?")
    ("a" "Acropolis" entry
-    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Goes in Acropolis")
+    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Acropolis")
+    "** TODO %?")
+   ("e" "Emacs" entry
+    (file+olp "~/acropolis/inbox.org" "1) Process inbox" "Captured task pile" "Emacs")
     "** TODO %?")))
 (org-todo-keywords
  '((sequence "TASK(a)" "TODO(t)" "NEXT(n)" "IDEA(i)" "|" "DONE(d)")
@@ -972,6 +985,8 @@
  ("r" counsel-recentf "recent")
  ("s" save-buffer "save")
  ("." find-file "find"))
+
+
 
 (use-package dashboard
   :ensure t
