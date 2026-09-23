@@ -86,3 +86,5 @@ organization/discovery/presentation — both still fully open, not
 decided.
 
 2026-09-23 decision | Drop org-modern heading icons (org-modern-star nil, fold arrows lagged on subtree moves via font fallback); explicit macOS-bundled fonts: default/fixed-pitch Menlo, variable-pitch Avenir Next, families only. Backup: fiend_ews.org.bak-2026-09-23. Branch fonts-lightweight-headings (c393a3a). wiki/ now tracked in git.
+
+2026-09-23 decision | Live font switching: fiend/set-font on SPC t f (prose -> variable-pitch, code -> default+fixed-pitch; vertico list of installed families; until restart). Note: set-face-attribute is not an M-x command; built-in fallback is M-x set-face-font. Backup: fiend_ews.org.bak-2026-09-23b.
