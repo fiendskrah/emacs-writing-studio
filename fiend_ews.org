@@ -291,6 +291,18 @@ The next section hooks the Variable Pitch mode to any buffer in text mode. This 
     (text-mode . mixed-pitch-mode))
 #+end_src
 
+*Fonts*
+Explicit families, all bundled with macOS (nothing to install). Families
+only, no :height, so sizes stay as they were. Change live with
+=M-x set-face-attribute= (applies to every buffer at once) and resize
+globally with =C-x C-M-+= / =C-x C-M--=. mixed-pitch follows the
+variable-pitch face, so prose updates with it.
+#+begin_src elisp
+  (set-face-attribute 'default nil :family "Menlo")
+  (set-face-attribute 'fixed-pitch nil :family "Menlo")
+  (set-face-attribute 'variable-pitch nil :family "Avenir Next")
+#+end_src
+
 This last code snippet in the look-and-feel section changes how Emacs automatically split windows to favour vertical splits over horizontal ones to improve readability. This section also installs the Balanced Windows package, which manages window sizes automatically. For example, when opening three windows and you close one, the remaining windows each get half the screen.
 
 #+begin_src elisp :exports none
@@ -484,6 +496,9 @@ The last package to modify Org buffers is Org Modern. However, most of the featu
     :hook
     (org-mode . org-modern-mode)
     :custom
+    ;; No heading icons: fold arrows swap glyphs on every fold/move and
+    ;; trigger system font-fallback lookups (laggy). Plain stars instead.
+    (org-modern-star nil)
     (org-modern-table nil)
     (org-modern-keyword nil)
     (org-modern-timestamp nil)
