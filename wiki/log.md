@@ -92,3 +92,5 @@ decided.
 2026-09-23 fix | SPC t f did not change org buffer text: mixed-pitch-mode snapshots font families into buffer-local face remaps at enable time (mixed-pitch.el ~158-194). fiend/set-font now re-toggles mixed-pitch-mode in every buffer where it is on. Backup: fiend_ews.org.bak-2026-09-23c.
 
 2026-09-23 fix | Dired: SPC leader and "." dotfile toggle were shadowed by evil-collection dired normal-state keys (SPC -> dired-next-line, "." -> dired-clean-directory). Fixed via evil-collection-setup-hook in evil-collection :init: SPC unbound in dired normal state (falls through to leader), "." -> dired-omit-mode. Scoped to dired only; SPC may be shadowed the same way in other evil-collection modes. Backup: fiend_ews.org.bak-2026-09-23d.
+
+2026-09-23 note | Open lead on heading lag: if M-up/M-down on headings is still slow after org-modern-star nil, next suspect is org-indent-mode (org-startup-indented t), which recomputes line prefixes on subtree moves. Test: M-x org-indent-mode off in a big buffer.
