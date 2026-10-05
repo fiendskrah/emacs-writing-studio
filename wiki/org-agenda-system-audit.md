@@ -106,3 +106,27 @@ primitives got used, not sheer volume.
   had a corrupted "Books" entry noticed mid-session (lost its
   DEADLINE/checklist, garbled text) — flagged, not touched, not
   independently re-verified since.
+
+## Later addition: weekly focus (2026-10-05)
+
+Weekly Review step "pick 2-3 things to focus on" now has a home:
+inbox.org top-level `* Weekly focus`, filled by capture `SPC o c w`
+(one date prompt via `fiend/weekly-focus-range`; produces
+`** Week of [Mon]--[Sun] :focus:` with `*** TODO` children, M-S-RET for
+more). Surfaced once atop the week agenda by a custom `"a"` command
+(shadows built-in `a`, so `SPC o a a`) and as a group in the `"d"`
+dashboard.
+
+Design choices, and why:
+- Inactive date range: an active range bannered the heading on every
+  agenda day, which Dylan didn't want.
+- TODO headings, not checkboxes: checkboxes never reach the agenda.
+- No `[/]` cookie: the item count varies week to week; Dylan didn't
+  want the counter.
+- Old weeks: tag `:ARCHIVE:` (C-c C-x a) to keep them folded; leftover
+  TODOs then drop out of the agenda.
+
+Still open: the Weekly Review's `RESET_CHECK_BOXES` drawer sits below
+its checklist, not directly under the heading/planning line, so org
+won't read it and the boxes won't auto-reset on repeat. Same for the
+Quarterly Review.
