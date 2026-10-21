@@ -116,3 +116,5 @@ decided.
 2026-10-21 change | Rewrite promoted: rewrite/fiend_ews.rewrite.org copied over fiend_ews.org and tangled to init.el (batch; Emacs not restarted, `SPC x r` to pick it up). init.el is byte-identical to the verified temp tangle. Backups: fiend_ews.org.bak-2026-10-21 (pre-rewrite org, also ~/jdp/fiend_ews.org), init.el.bak-2026-10-21 (pre-rewrite init).
 
 2026-10-21 housekeeping | .emacs.d tidy: all fiend_ews.org.bak-* and init.el.bak-* moved into bak/ (not tracked); removed editor leftovers (#custom.el#, #init.el#, %backup%~ [stale Jul 2025 copy of a bib note], custom.el~, fiend_ews.org~, .fiend_ews.org.~undo-tree~), the spell-fu/ cache (spell-fu is no longer configured) and the staged rewrite/ copy (identical to the live fiend_ews.org). Removed ~/jdp/emacs.org (old copy of the config; still in the jdp repo history, deletion not committed).
+
+2026-10-21 change | spell-fu removed entirely: dropped from `package-selected-packages` in custom.el and deleted elpa/spell-fu-20250712.1319. Backup: bak/custom.el.bak-2026-10-21. Sandbox load beforehand showed an identical state fingerprint. Restart Emacs to pick it up.
