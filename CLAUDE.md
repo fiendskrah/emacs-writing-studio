@@ -119,14 +119,14 @@ on branch `fiendmacs`, which is the main branch for this config.
 - **Completion framework**: vertico/orderless/marginalia/consult stack
   (EWS default) is the one actually active. `ivy`/`counsel`/`swiper`/
   `ivy-rich`/`ivy-posframe` are also configured (Interface chapter, "Swiper, Ivy and Counsel") but
-  `(ivy-mode 1)` is deliberately commented out (2026-09-03) — it was
+  `(ivy-mode 1)` is deliberately not enabled (2026-09-03) — it was
   running simultaneously with `vertico-mode`, each claiming the default
   `completing-read-function`. Nothing was removed: `swiper`/`counsel-*`
   bindings (`C-s`, `C-x C-f`, `M-x`, `C-x b`, `SPC tt`, `SPC .`,
   hydra-file `r`) still work unchanged since they call `ivy-read`
   directly and don't need `ivy-mode` active globally — only plain,
   un-remapped `completing-read` calls now render via vertico instead of
-  ivy. If you want ivy back as the default, uncomment that one line.
+  ivy. If you want ivy back as the default, add `:config (ivy-mode 1)` to the `ivy` block.
   `vertico-posframe` (added 2026-09-03, mirrors `ivy-posframe`'s
   frame-center positioning) makes vertico-driven commands — e.g. the PKB
   full-text search above — render centered too, instead of the plain
