@@ -120,3 +120,5 @@ decided.
 2026-10-21 change | spell-fu removed entirely: dropped from `package-selected-packages` in custom.el and deleted elpa/spell-fu-20250712.1319. Backup: bak/custom.el.bak-2026-10-21. Sandbox load beforehand showed an identical state fingerprint. Restart Emacs to pick it up.
 
 2026-10-21 change | Config backed up to the ThinkPad: bare repo `homeserver:~/emacs-config-backup.git` (branch fiendmacs, pushed over Tailscale since the ThinkPad has no GitHub key). Refresh with `git push ssh://homeserver/home/fiend/emacs-config-backup.git fiendmacs`. No Emacs on the ThinkPad by decision (config depends on the Mac: ~/jdp, Zotero). custom.el (gitignored, Customize output: citar/denote paths, bibliography, package-selected-packages) is not in any backup. Open: GitHub default branch is still master; Dylan to switch to fiendmacs in repo Settings (no gh CLI installed).
+
+2026-10-21 decision | GitHub default branch is now fiendmacs (switched by Dylan). jdp repo is no longer tracked here; its leftover emacs.org deletion and ~/jdp/fiend_ews.org copy are out of scope.
