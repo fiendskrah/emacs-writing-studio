@@ -49,6 +49,17 @@ Variables set through the customisation interface are written to =custom.el= so 
 (keymap-global-set "C-c w v" 'customize-variable)
 #+end_src
 
+** Library path
+
+The root of the Denote library is written once, here. The Denote directory, the agenda globs, the bibliography directory and the PKB picker all derive their paths from =fiend/denote-lib=, so moving the library means changing this one line and re-pointing the Zotero exports. Because it is set after =custom.el= loads, it takes precedence over the older path values that file still holds.
+
+#+begin_src elisp
+(defvar fiend/denote-lib "~/jdp/denote-lib/"
+  "Root of the Denote library: pkb/, notes/ and the .bib files.")
+
+(setopt denote-directory (expand-file-name fiend/denote-lib))
+#+end_src
+
 ** Package management
 
 Packages come from MELPA first, then GNU ELPA and NonGNU ELPA. =use-package= declares each package, and =use-package-always-ensure= installs anything missing, so a block that names a package is enough to obtain it. Warnings below emergency level are silenced. Packages that are built in or deliberately absent set =:ensure nil=.
@@ -360,7 +371,7 @@ Spacious Padding adds whitespace around windows and frames, and line spacing is 
 
 ** Themes
 
-The Modus themes are configured with italic and bold constructs and mixed fonts but are not loaded. =doom-bluloco-dark= from Doom Themes is the active theme. The Doom modeline and the other Doom packages are not loaded.
+The Modus themes are configured with italic and bold constructs and mixed fonts but are not loaded. =doom-bluloco-dark= from Doom Themes is the active theme. The other Doom packages are not loaded; the Doom modeline has its own section below.
 
 #+begin_src elisp
 (use-package modus-themes
@@ -372,6 +383,34 @@ The Modus themes are configured with italic and bold constructs and mixed fonts 
 (use-package doom-themes
   :init
   (load-theme 'doom-bluloco-dark t))
+#+end_src
+
+** Doom Modeline
+
+Doom Modeline replaces the stock mode line. Its icons come from Nerd Icons, whose font is installed once with =nerd-icons-install-fonts=. The file name is shown from the project root (=truncate-with-project=). Files in the PKB are shown by title alone: =fiend/mode-line-slug= drops the Denote timestamp, optional signature and =__keywords= from the displayed name, so =20260109T154328--home-server__homeserver_hub.org= reads =home-server.org=. Only the display changes, never the file. Names that are not Denote names, or have no title, pass through unchanged. Doom Modeline calls the function through =doom-modeline-buffer-file-name-function=. The bar also shows a word count in Org buffers (the selection's count while text is highlighted), the total line count beside the current line, and the clock from =display-time-mode=.
+
+#+begin_src elisp
+(defconst fiend/mode-line-denote-regexp
+  "\\`[0-9]\\{8\\}T[0-9]\\{6\\}\\(?:==[^-_.]*\\)?--\\([^_.]+\\)\\(?:__[^.]*\\)?\\(\\..*\\)?\\'")
+
+(defun fiend/mode-line-slug (path)
+  (let ((name (file-name-nondirectory path)))
+    (if (string-match fiend/mode-line-denote-regexp name)
+        (concat (file-name-directory path)
+                (match-string 1 name)
+                (or (match-string 2 name) ""))
+      path)))
+
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (doom-modeline-buffer-file-name-function #'fiend/mode-line-slug)
+  (doom-modeline-height 28)
+  (doom-modeline-enable-word-count t)
+  (doom-modeline-total-line-number t))
+
+(display-time-mode 1)
 #+end_src
 
 ** Mixed Pitch
@@ -696,7 +735,7 @@ Org Babel runs Python through IPython from the mambaforge environment, with the 
 
 Capture is the entry point for the task workflow. Task capture templates file a tagged TODO into the inbox under "Captured task pile", with the tag naming the area (dissertation, service, life, teaching, tool and so on) so the item lands in the right agenda group before it is processed. Note capture templates create a Denote note in the PKB directly and skip the inbox. The weekly focus template prompts for a Monday and files a heading with an inactive Monday-to-Sunday range under "Weekly focus", with TODO children that the week agenda lists once at the top.
 
-Two independent keyword sequences define task state. =TASK=, =TODO=, =NEXT= and =IDEA= lead to =DONE=; =HOLD=, =WAITING= and =DEADLINE= lead to =CANCELLED=. Completion is timestamped with a =CLOSED:= line. Six tags are declared with fast keys; all other tags are free-form. The base agenda files are fixed here; the PKB directory is added to them in the agenda chapter.
+Two independent keyword sequences define task state. =TASK=, =TODO=, =NEXT= and =IDEA= lead to =DONE=; =HOLD=, =WAITING= and =DEADLINE= lead to =CANCELLED=. Completion is timestamped with a =CLOSED:= line. Tags are declared with fast keys in three groups: five parking and topic tags, a priority group (=p1= to =p3=, with =p3= meaning parked) and a stage group (=ideation=, =paper=, =relic=). The priority and stage groups are mutually exclusive, so a note carries at most one of each. All other tags are free-form. The base agenda files are fixed here; the PKB directory is added to them in the agenda chapter.
 
 #+begin_src elisp
 (defvar fiend/base-agenda-files
@@ -729,10 +768,19 @@ week agenda (custom \"a\" command), not as a banner on every day."
   (org-tag-alist
    '(("bigpicture" . ?B)
      ("someday" . ?S)
-     ("ideation" . ?I)
      ("knowledge" . ?K)
      ("project" . ?P)
-     ("media" . ?M)))
+     ("media" . ?M)
+     (:startgroup)
+     ("p1" . ?1)
+     ("p2" . ?2)
+     ("p3" . ?3)
+     (:endgroup)
+     (:startgroup)
+     ("ideation" . ?I)
+     ("paper" . ?A)
+     ("relic" . ?R)
+     (:endgroup)))
   (org-log-done 'time)
   (org-capture-templates
    '(("t" "Task")
@@ -804,18 +852,18 @@ The agenda is the primary work-management surface. It covers dissertation work, 
 
 ** Agenda files
 
-The agenda files are the fixed base list plus every real note in the PKB directory. Symlinks and lock files are excluded, since the stable symlinks point at timestamped files in the same directory and would double every headline. The list is recomputed before each =org-agenda= call, so renamed and new notes appear without a restart. Bibliographic notes are deliberately left out; =fiend/bib-org-files= remains defined as a one-line toggle. A progress reporter advises the per-file check so a long scan is visible.
+The agenda files are the fixed base list plus every real note in the PKB directory. Symlinks and lock files are excluded, since the stable symlinks point at timestamped files in the same directory and would double every headline. Both globs start from =fiend/denote-lib=. The list is recomputed before each =org-agenda= call, so renamed and new notes appear without a restart. Bibliographic notes are deliberately left out; =fiend/bib-org-files= remains defined as a one-line toggle. A progress reporter advises the per-file check so a long scan is visible.
 
 #+begin_src elisp
 (defun fiend/pkb-org-files ()
   "Real (non-symlink, non-lockfile) pkb notes for org-agenda-files."
   (seq-remove #'file-symlink-p
-              (directory-files "~/jdp/denote-lib/pkb/" t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "pkb/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/bib-org-files ()
   "Real (non-symlink, non-lockfile) bibliographic notes. Currently unused."
   (seq-remove #'file-symlink-p
-              (directory-files "~/jdp/denote-lib/notes/" t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/refresh-agenda-files (&rest _)
   "Recompute `org-agenda-files' from the base list plus current pkb/ contents."
@@ -881,7 +929,7 @@ The category column is dropped from every agenda line. With Denote filenames as 
 
 ** Org Super Agenda
 
-Org Super Agenda groups the flat agenda into named sections. Three custom commands build on it. =a= replaces the built-in week agenda and lists the weekly focus items once above it. =d= is the grouped dashboard: it discards parked items (=bigpicture=, =someday=, =media=, =project=), then groups by focus, dissertation and service, NEXT, WAITING, life, teaching, knowledge, ideation, writing, tools, personal projects and journal, with everything else last. =s= lists the parked items on demand.
+Org Super Agenda groups the flat agenda into named sections. Four custom commands build on it. =a= replaces the built-in week agenda and lists the weekly focus items once above it. =d= is the grouped dashboard: it discards parked items (=bigpicture=, =someday=, =media=, =project=), then groups by focus, dissertation and service, NEXT, WAITING, life, teaching, knowledge, ideation, writing, tools, personal projects and journal, with everything else last. =s= lists the parked items on demand. =i= lists ideas and papers (the =ideation= and =paper= stages) grouped by priority, and the dashboard splits its ideation group into =p1= and =p2= above the rest.
 
 The agenda starts in Evil's Motion state. Its stock keys are shadowed by Evil's, so =j=, =k=, =/=, =\=, =l=, =RET= and =v= are rebound to their agenda commands: line movement, tag filter, tag refine, log mode, open, and the view dispatcher. Super Agenda group headers carry a text-property keymap that Evil never consults, so =j= and =k= are set there with a plain =define-key=.
 
@@ -937,6 +985,10 @@ The agenda starts in Evil's Motion state. Its stock keys are shadowed by Evil's,
                                       :tag "teaching")
                                (:name "Knowledge / Reference"
                                       :tag "knowledge")
+                               (:name "Ideation P1"
+                                      :and (:tag "ideation" :tag "p1"))
+                               (:name "Ideation P2"
+                                      :and (:tag "ideation" :tag "p2"))
                                (:name "Ideation"
                                       :tag "ideation")
                                (:name "Writing"
@@ -949,6 +1001,14 @@ The agenda starts in Evil's Motion state. Its stock keys are shadowed by Evil's,
                                       :tag "journal")
                                (:name "Uncategorized"
                                       :anything t)))))))
+                ("i" "Ideas and papers by priority"
+                 ((tags-todo "ideation|paper"
+                             ((org-agenda-overriding-header "Ideas and papers")
+                              (org-super-agenda-groups
+                               '((:name "P1" :tag "p1")
+                                 (:name "P2" :tag "p2")
+                                 (:name "P3 (parked)" :tag "p3")
+                                 (:name "No priority" :anything t)))))))
                 ("s" "Someday / Big Picture / Parked"
                  ((tags "bigpicture|someday|media|project"
                         ((org-agenda-overriding-header
@@ -1044,7 +1104,7 @@ Research notes live in a Denote library with two sibling directories, told apart
 The bibliography directory sits under the Denote library, and every =.bib= file found there is registered globally. BibTeX entries carry two extra fields, keywords and a file path for attachments. =C-c w b r= re-registers after files change.
 
 #+begin_src elisp
-(setq ews-bibtex-directory (expand-file-name "~/jdp/denote-lib/")
+(setq ews-bibtex-directory (expand-file-name fiend/denote-lib)
       ews-bibtex-files "\\.bib\\'")
 
 (use-package bibtex
@@ -1102,7 +1162,7 @@ Citar opens, inserts and browses bibliography entries, reading the registered =.
 
 ** Denote
 
-Denote names notes by timestamp, title and keywords, and links them by identifier. Keywords are kept sorted, and Dired highlights note filenames. Commands live under =C-c w d=. Creating a note through =fiend/pkb-link-or-create= (=C-c w d i=) rebinds the Denote directory to =pkb/=, so new notes land there rather than at the library root. Loading =denote-org-extras= currently fails because the file is absent from the installed version; the rest of the block is unaffected.
+Denote names notes by timestamp, title and keywords, and links them by identifier. Keywords are kept sorted, and Dired highlights note filenames. Commands live under =C-c w d=. Creating a note through =fiend/pkb-link-or-create= (=C-c w d i=) rebinds the Denote directory to =pkb/=, so new notes land there rather than at the library root. Denote 4.0 moved its Org extras into the separate =denote-org= package, which has its own block below. =denote-excluded-directories-regexp= hides =works/=: promoted projects there are frozen copies of notes that share identifiers with the live ones, and would otherwise appear twice in link completion, backlinks and search.
 
 #+begin_src elisp
 (defun fiend/pkb-link-or-create ()
@@ -1115,23 +1175,26 @@ Denote names notes by timestamp, title and keywords, and links them by identifie
   :defer t
   :custom
   (denote-sort-keywords t)
+  (denote-excluded-directories-regexp "\\`works\\(/\\|\\'\\)")
   :hook
   (dired-mode . denote-dired-mode)
   :custom-face
   (denote-faces-link ((t (:slant italic))))
-  :init
-  (require 'denote-org-extras)
   :bind
   (("C-c w d b" . denote-find-backlink)
    ("C-c w d d" . denote-date)
    ("C-c w d f" . denote-find-link)
-   ("C-c w d h" . denote-org-extras-link-to-heading)
    ("C-c w d i" . fiend/pkb-link-or-create)
    ("C-c w d k" . denote-rename-file-keywords)
    ("C-c w d l" . denote-insert-link)
    ("C-c w d n" . denote-subdirectory)
    ("C-c w d r" . denote-rename-file)
    ("C-c w d R" . denote-rename-file-using-front-matter)))
+
+(use-package denote-org
+  :after denote
+  :bind
+  (("C-c w d h" . denote-org-link-to-heading)))
 #+end_src
 
 ** Consult Notes
@@ -1197,7 +1260,7 @@ Denote Explore reports on the collection: counts and bar charts of notes and key
 
 Local helpers in =fiend_tools/= and below move captured items into the PKB. =SPC p p= jumps to a note by title, =SPC p t= narrows by tag through the picker in =my-pkb-picker=, and =SPC p g= searches text.
 
-=SPC p f= cuts the subtree at point and files it into an existing note as a new top-level heading tagged =:new:=, which marks it as not yet triaged. =SPC p n= cuts the subtree, uses its heading as the title and creates a new note in =pkb/=, prompting for keywords and writing them to both the filename and the front matter. =SPC p v= transcribes a video to an =.srt= file in =pkb/refs/= with Whisper in a conda environment, asynchronously, so the transcript becomes searchable.
+=SPC p f= cuts the subtree at point and files it into an existing note as a new top-level heading tagged =:new:=, which marks it as not yet triaged. =SPC p n= cuts the subtree, uses its heading as the title and creates a new note in =pkb/=, prompting for keywords and writing them to both the filename and the front matter. =SPC p v= transcribes a video to an =.srt= file in =pkb/refs/= with Whisper in a conda environment, asynchronously, so the transcript becomes searchable. =M-x fiend/pkb-promote= runs =promote-idea.py= on the current note: without a prefix argument it prints the plan and the reference checks and writes nothing; with =C-u= it copies the note and everything it touches into a new project folder under =works/=.
 
 Plain =org-refile= (=C-c C-w=) targets the top level of PKB notes only, shows headline text without paths, and inserts new items first in =pkb/= files. The refile targets deliberately exclude =notes/=.
 
@@ -1255,13 +1318,26 @@ transcript in pkb/refs/, timestamped and searchable via
 denote-directory. Runs async - transcription of a lecture-length video
 takes minutes, and shouldn't block Emacs while it runs."
   (interactive (list (read-file-name "Video file: " "~/jdp/media/")))
-  (let* ((outdir (expand-file-name "refs/" (denote-directory)))
+  (let* ((outdir (expand-file-name "pkb/refs/" fiend/denote-lib))
          (default-directory outdir))
     (async-shell-command
      (format "conda run -n media-tools whisper %s --output_dir %s --output_format srt"
              (shell-quote-argument (expand-file-name video))
              (shell-quote-argument outdir))
      (format "*whisper-transcribe-%s*" (file-name-base video)))))
+
+(defun fiend/pkb-promote (slug &optional execute)
+  "Run promote-idea.py on the current note for project SLUG.
+Without a prefix argument print the plan and checks only; with one, write the folder."
+  (interactive (list (read-string "Project slug: ") current-prefix-arg))
+  (compile (string-join
+            (delq nil (list "python3"
+                            (shell-quote-argument (expand-file-name "fiend_tools/promote-idea.py" user-emacs-directory))
+                            (shell-quote-argument (buffer-file-name))
+                            (shell-quote-argument slug)
+                            "--lib" (shell-quote-argument (expand-file-name fiend/denote-lib))
+                            (and execute "--execute")))
+            " ")))
 
 (defun fiend/pkb-extract-subtree-to-note ()
   "Extract the org subtree at point into a new Denote note in pkb/.
