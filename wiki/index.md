@@ -20,3 +20,6 @@ only live in chat.
   what was kept and why, and the rationale from stripped comments.
 - [modeline.md](modeline.md) — 2026-10-23 Doom Modeline setup: what each
   segment means, the PKB filename slug, options not taken, setup notes.
+- [denote-library-state.md](denote-library-state.md) — 2026-10-23 state of the
+  Denote library: layout (pkb/, bib_notes/, works/), repos and backups, tag
+  scheme, relics, deferred items (templates, narsc promotion, symlink removal).
