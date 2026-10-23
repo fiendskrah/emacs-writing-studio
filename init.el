@@ -21,6 +21,11 @@
 
 (keymap-global-set "C-c w v" 'customize-variable)
 
+(defvar fiend/denote-lib "~/jdp/denote-lib/"
+  "Root of the Denote library: pkb/, notes/ and the .bib files.")
+
+(setopt denote-directory (expand-file-name fiend/denote-lib))
+
 (require 'package)
 
 (setq package-archives
@@ -249,6 +254,28 @@
 (use-package doom-themes
   :init
   (load-theme 'doom-bluloco-dark t))
+
+(defconst fiend/mode-line-denote-regexp
+  "\\`[0-9]\\{8\\}T[0-9]\\{6\\}\\(?:==[^-_.]*\\)?--\\([^_.]+\\)\\(?:__[^.]*\\)?\\(\\..*\\)?\\'")
+
+(defun fiend/mode-line-slug (path)
+  (let ((name (file-name-nondirectory path)))
+    (if (string-match fiend/mode-line-denote-regexp name)
+        (concat (file-name-directory path)
+                (match-string 1 name)
+                (or (match-string 2 name) ""))
+      path)))
+
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (doom-modeline-buffer-file-name-function #'fiend/mode-line-slug)
+  (doom-modeline-height 28)
+  (doom-modeline-enable-word-count t)
+  (doom-modeline-total-line-number t))
+
+(display-time-mode 1)
 
 (use-package mixed-pitch
   :hook
@@ -510,10 +537,19 @@ week agenda (custom \"a\" command), not as a banner on every day."
   (org-tag-alist
    '(("bigpicture" . ?B)
      ("someday" . ?S)
-     ("ideation" . ?I)
      ("knowledge" . ?K)
      ("project" . ?P)
-     ("media" . ?M)))
+     ("media" . ?M)
+     (:startgroup)
+     ("p1" . ?1)
+     ("p2" . ?2)
+     ("p3" . ?3)
+     (:endgroup)
+     (:startgroup)
+     ("ideation" . ?I)
+     ("paper" . ?A)
+     ("relic" . ?R)
+     (:endgroup)))
   (org-log-done 'time)
   (org-capture-templates
    '(("t" "Task")
@@ -571,12 +607,12 @@ week agenda (custom \"a\" command), not as a banner on every day."
 (defun fiend/pkb-org-files ()
   "Real (non-symlink, non-lockfile) pkb notes for org-agenda-files."
   (seq-remove #'file-symlink-p
-              (directory-files "~/jdp/denote-lib/pkb/" t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "pkb/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/bib-org-files ()
   "Real (non-symlink, non-lockfile) bibliographic notes. Currently unused."
   (seq-remove #'file-symlink-p
-              (directory-files "~/jdp/denote-lib/notes/" t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/refresh-agenda-files (&rest _)
   "Recompute `org-agenda-files' from the base list plus current pkb/ contents."
@@ -678,6 +714,10 @@ week agenda (custom \"a\" command), not as a banner on every day."
                                       :tag "teaching")
                                (:name "Knowledge / Reference"
                                       :tag "knowledge")
+                               (:name "Ideation P1"
+                                      :and (:tag "ideation" :tag "p1"))
+                               (:name "Ideation P2"
+                                      :and (:tag "ideation" :tag "p2"))
                                (:name "Ideation"
                                       :tag "ideation")
                                (:name "Writing"
@@ -690,6 +730,14 @@ week agenda (custom \"a\" command), not as a banner on every day."
                                       :tag "journal")
                                (:name "Uncategorized"
                                       :anything t)))))))
+                ("i" "Ideas and papers by priority"
+                 ((tags-todo "ideation|paper"
+                             ((org-agenda-overriding-header "Ideas and papers")
+                              (org-super-agenda-groups
+                               '((:name "P1" :tag "p1")
+                                 (:name "P2" :tag "p2")
+                                 (:name "P3 (parked)" :tag "p3")
+                                 (:name "No priority" :anything t)))))))
                 ("s" "Someday / Big Picture / Parked"
                  ((tags "bigpicture|someday|media|project"
                         ((org-agenda-overriding-header
@@ -763,7 +811,7 @@ Returns 0 if the file or heading can't be found."
   (evil-define-key '(normal motion) dashboard-mode-map
     (kbd "A") #'fiend/dashboard-jump-to-super-agenda))
 
-(setq ews-bibtex-directory (expand-file-name "~/jdp/denote-lib/")
+(setq ews-bibtex-directory (expand-file-name fiend/denote-lib)
       ews-bibtex-files "\\.bib\\'")
 
 (use-package bibtex
@@ -810,23 +858,26 @@ Returns 0 if the file or heading can't be found."
   :defer t
   :custom
   (denote-sort-keywords t)
+  (denote-excluded-directories-regexp "\\`works\\(/\\|\\'\\)")
   :hook
   (dired-mode . denote-dired-mode)
   :custom-face
   (denote-faces-link ((t (:slant italic))))
-  :init
-  (require 'denote-org-extras)
   :bind
   (("C-c w d b" . denote-find-backlink)
    ("C-c w d d" . denote-date)
    ("C-c w d f" . denote-find-link)
-   ("C-c w d h" . denote-org-extras-link-to-heading)
    ("C-c w d i" . fiend/pkb-link-or-create)
    ("C-c w d k" . denote-rename-file-keywords)
    ("C-c w d l" . denote-insert-link)
    ("C-c w d n" . denote-subdirectory)
    ("C-c w d r" . denote-rename-file)
    ("C-c w d R" . denote-rename-file-using-front-matter)))
+
+(use-package denote-org
+  :after denote
+  :bind
+  (("C-c w d h" . denote-org-link-to-heading)))
 
 (use-package consult-notes
   :bind
@@ -922,13 +973,26 @@ transcript in pkb/refs/, timestamped and searchable via
 denote-directory. Runs async - transcription of a lecture-length video
 takes minutes, and shouldn't block Emacs while it runs."
   (interactive (list (read-file-name "Video file: " "~/jdp/media/")))
-  (let* ((outdir (expand-file-name "refs/" (denote-directory)))
+  (let* ((outdir (expand-file-name "pkb/refs/" fiend/denote-lib))
          (default-directory outdir))
     (async-shell-command
      (format "conda run -n media-tools whisper %s --output_dir %s --output_format srt"
              (shell-quote-argument (expand-file-name video))
              (shell-quote-argument outdir))
      (format "*whisper-transcribe-%s*" (file-name-base video)))))
+
+(defun fiend/pkb-promote (slug &optional execute)
+  "Run promote-idea.py on the current note for project SLUG.
+Without a prefix argument print the plan and checks only; with one, write the folder."
+  (interactive (list (read-string "Project slug: ") current-prefix-arg))
+  (compile (string-join
+            (delq nil (list "python3"
+                            (shell-quote-argument (expand-file-name "fiend_tools/promote-idea.py" user-emacs-directory))
+                            (shell-quote-argument (buffer-file-name))
+                            (shell-quote-argument slug)
+                            "--lib" (shell-quote-argument (expand-file-name fiend/denote-lib))
+                            (and execute "--execute")))
+            " ")))
 
 (defun fiend/pkb-extract-subtree-to-note ()
   "Extract the org subtree at point into a new Denote note in pkb/.

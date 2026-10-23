@@ -146,9 +146,7 @@ on branch `fiendmacs`, which is the main branch for this config.
   see `wiki/org-agenda-system-audit.md`); it was also the cause of a
   separate startup hang (forced a full 4-archive network refresh every
   launch). Resolved.
-- **`denote` package fails to init**: `Cannot open load file:
-  denote-org-extras` — file missing, likely a stale reference from an
-  older Denote version. Still open.
+- ~~`denote` package fails to init (`denote-org-extras`)~~ — fixed 2026-10-22: Denote 4.0 moved its Org extras into the separate `denote-org` package; the config now loads that instead, and Denote was upgraded 4.0.0 → 4.2.x because `denote-org` 0.3.0 needs a newer Denote (`denote-get-completion-table`). `C-c w d h` works. Resolved.
 - **`history` file corrupted** at line 31 (`evil-jumps-history` has a
   dangling `#99#` circular-reference with no matching `#99=`) — savehist
   errors loading it on every startup. Low priority, not blocking.
