@@ -10,7 +10,7 @@
 #   (not ignored) text-like files (org md txt tex bib py R qmd Rmd ipynb yml
 #   yaml toml cfg sh el json csv), except files over N MB (default 2) and
 #   anything under a dot-directory. Skipped files are listed in SKIPPED.tsv.
-#   Writes README.org (origin path, remote, commit, date, dirty count), a
+#   Writes SNAPSHOT.org (origin path, remote, commit, date, dirty count), a
 #   .project marker, and commits everything.
 #
 # Written for macOS's stock /bin/bash 3.2.
@@ -82,7 +82,7 @@ while IFS= read -r f; do
 done < "$list"
 { printf 'bytes\tpath\n'; sort -rn "$skipped"; } > "$dest/SKIPPED.tsv"
 : > "$dest/.project"
-cat > "$dest/README.org" <<EOF
+cat > "$dest/SNAPSHOT.org" <<EOF
 #+title: $slug (relic snapshot)
 #+snapshot_of: $src
 #+snapshot_remote: $remote
