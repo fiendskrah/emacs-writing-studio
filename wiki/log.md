@@ -132,3 +132,5 @@ decided.
 2026-10-23 change | Doom Modeline: added `doom-modeline-enable-word-count`, `doom-modeline-total-line-number` and `(display-time-mode 1)` to the Doom Modeline section of fiend_ews.org (not tangled; Dylan runs `SPC x r`). Backup: bak/fiend_ews.org.bak-2026-10-23. Verified: temp tangle diffed against init.el shows the earlier modeline block plus these three lines only. Visual result not checked.
 
 2026-10-23 lint | `fiend/pkb-promote` wrapper run by Dylan as a dry run on the home-server note (slug homeserver): compilation finished in 0.45s. Same dry run repeated from the shell: plan lists 2 notes (home-server hub, torrenting), refs.bib with 0 of 0 keys, nothing written (no works/ dir exists). Closes the "wrapper NOT run" item from the 2026-10-22 Bundle A entry; the --execute path is still untested.
+
+2026-10-23 change | CLAUDE.md refreshed: Doom Modeline added to Status/Working (with the PKB slug and word count/clock/total lines), removed from the "no documented rationale" list; the fixed `denote-org-extras` item dropped from "In progress". Backup: bak/CLAUDE.md.bak-2026-10-23.

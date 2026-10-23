@@ -150,8 +150,8 @@ on branch `fiendmacs`, which is the main branch for this config.
 - **`history` file corrupted** at line 31 (`evil-jumps-history` has a
   dangling `#99#` circular-reference with no matching `#99=`) — savehist
   errors loading it on every startup. Low priority, not blocking.
-- **No documented rationale** for org-roam, vulpea, org-noter,
-  doom-modeline, or why Denote was chosen over alternatives. Don't
+- **No documented rationale** for org-roam, vulpea, org-noter, or why
+  Denote was chosen over alternatives. Don't
   assume these were considered and rejected — ask rather than infer if
   they come up.
 - **PKB tag taxonomy design** (2026-09-21 audit consolidated
@@ -179,11 +179,12 @@ inside org buffers); PKB full-text search
 ripgrep, now also on `SPC p g` and centered via `vertico-posframe`);
 single active completion framework (vertico, `ivy-mode` disabled
 2026-09-03, no bindings lost); Fall 2026 GEOG 581 agenda entries via the
-single-headline/multiple-timestamps pattern; startup (no more hang or
+single-headline/multiple-timestamps pattern; Doom Modeline (enabled 2026-10-22, replacing the stock bar; PKB
+filenames are slugged in the display only via `fiend/mode-line-slug`; word
+count, clock and total line number on); startup (no more hang or
 blocking errors, per 2026-09-21 audit — `wiki/org-agenda-system-audit.md`).
 
-**In progress**: `denote-org-extras` missing-file error and `history`
-corruption (low priority) — see Open Issues.
+**In progress**: `history` corruption (low priority) — see Open Issues.
 
 **Planned**: ongoing literature notes in Denote as reading progresses;
 continued iteration on `org-super-agenda` views; PKB tag taxonomy and
