@@ -18,3 +18,5 @@ only live in chat.
 - [fiend-ews-rewrite.md](fiend-ews-rewrite.md) — 2026-10-21 staged rewrite of
   `fiend_ews.org` into one chapter-per-function document; what was removed,
   what was kept and why, and the rationale from stripped comments.
+- [modeline.md](modeline.md) — 2026-10-23 Doom Modeline setup: what each
+  segment means, the PKB filename slug, options not taken, setup notes.

@@ -47,7 +47,10 @@ on branch `fiendmacs`, which is the main branch for this config.
   the `bib` keyword under `denote-directory` (`citar-notes-paths` in `custom.el` is inert).
 - **Research notes (PKB)**: Denote-based, root `~/acropolis/denote-library/`
   (moved there 2026-10-23 from `~/acropolis/jdp/denote-lib`, reached as
-  `~/jdp/denote-lib` through a forwarding symlink kept for about 30 days;
+  `~/jdp/denote-lib` through a forwarding symlink that is removed about
+  2026-11-22 (nothing in this config, fiend_tools or the wiki depends on it;
+  `custom.el` still holds old `~/jdp/denote-lib/...` values, all overridden
+  or inert);
   the path is written once, as `fiend/denote-lib` in the Foundations
   chapter), split into sibling dirs distinguished by Denote keyword:
   - `pkb/` — keyword `pkb` + topic keywords (`academia_pkb`,

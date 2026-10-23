@@ -1318,7 +1318,7 @@ transcript in pkb/refs/, timestamped and searchable via
 `consult-notes-search-in-all-notes' since refs/ sits inside
 denote-directory. Runs async - transcription of a lecture-length video
 takes minutes, and shouldn't block Emacs while it runs."
-  (interactive (list (read-file-name "Video file: " "~/jdp/media/")))
+  (interactive (list (read-file-name "Video file: " "~/acropolis/media/")))
   (let* ((outdir (expand-file-name "pkb/refs/" fiend/denote-lib))
          (default-directory outdir))
     (async-shell-command

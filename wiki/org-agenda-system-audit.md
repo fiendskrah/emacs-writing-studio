@@ -87,7 +87,7 @@ primitives got used, not sheer volume.
 ## Still open
 
 - **Two stale/duplicate TODOs in the `home-server` PKB hub note**
-  (`~/jdp/denote-lib/pkb/20260109T154328--home-server__homeserver_hub.org`),
+  (`~/acropolis/denote-library/pkb/20260109T154328--home-server__homeserver_hub.org`),
   both `DEADLINE: <2026-09-25>`: "implement github clone on
   homeserver" is already done (`linux_box` cloned via GitHub SSH per
   `acropolis/linux_box/wiki/todo-thinkpad-migration.md` line 93,
@@ -100,9 +100,9 @@ primitives got used, not sheer volume.
   presence/absence) rather than tags at all — raised but not decided;
   the current tag consolidation is a real improvement, not necessarily
   the final shape.
-- `~/jdp/denote-lib/pkb/20260802T120351--new-task__ideation.org` is an
+- `~/acropolis/denote-library/pkb/20260802T120351--new-task__ideation.org` is an
   empty stub, worth deleting.
-- `~/jdp/denote-lib/pkb/20260802T112009--torrenting__homeserver_tool.org`
+- `~/acropolis/denote-library/pkb/20260802T112009--torrenting__homeserver_tool.org`
   had a corrupted "Books" entry noticed mid-session (lost its
   DEADLINE/checklist, garbled text) — flagged, not touched, not
   independently re-verified since.
