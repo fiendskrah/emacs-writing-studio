@@ -54,8 +54,8 @@ Variables set through the customisation interface are written to =custom.el= so 
 The root of the Denote library is written once, here. The Denote directory, the agenda globs, the bibliography directory and the PKB picker all derive their paths from =fiend/denote-lib=, so moving the library means changing this one line and re-pointing the Zotero exports. Because it is set after =custom.el= loads, it takes precedence over the older path values that file still holds.
 
 #+begin_src elisp
-(defvar fiend/denote-lib "~/jdp/denote-lib/"
-  "Root of the Denote library: pkb/, notes/ and the .bib files.")
+(defvar fiend/denote-lib "~/acropolis/denote-library/"
+  "Root of the Denote library: pkb/, bib_notes/ and works/.")
 
 (setopt denote-directory (expand-file-name fiend/denote-lib))
 #+end_src
@@ -863,7 +863,7 @@ The agenda files are the fixed base list plus every real note in the PKB directo
 (defun fiend/bib-org-files ()
   "Real (non-symlink, non-lockfile) bibliographic notes. Currently unused."
   (seq-remove #'file-symlink-p
-              (directory-files (expand-file-name "notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "bib_notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/refresh-agenda-files (&rest _)
   "Recompute `org-agenda-files' from the base list plus current pkb/ contents."
@@ -1097,14 +1097,14 @@ Returns 0 if the file or heading can't be found."
 
 * Notes and References
 
-Research notes live in a Denote library with two sibling directories, told apart by keyword. =pkb/= holds personal knowledge notes and project notes that track their own tasks. =notes/= holds one bibliographic note per paper, created when a paper is read rather than in advance. Zotero with Better BibTeX is the source of truth for references, surfaced through Citar and =org-cite=.
+Research notes live in a Denote library with two sibling directories, told apart by keyword. =pkb/= holds personal knowledge notes and project notes that track their own tasks. =bib_notes/= holds one bibliographic note per paper, and the Better BibTeX export =full_lib.bib=, created when a paper is read rather than in advance. Zotero with Better BibTeX is the source of truth for references, surfaced through Citar and =org-cite=.
 
 ** BibTeX
 
-The bibliography directory sits under the Denote library, and every =.bib= file found there is registered globally. BibTeX entries carry two extra fields, keywords and a file path for attachments. =C-c w b r= re-registers after files change.
+The bibliography directory is =bib_notes/= under the Denote library, and every =.bib= file found directly in it is registered globally. BibTeX entries carry two extra fields, keywords and a file path for attachments. =C-c w b r= re-registers after files change.
 
 #+begin_src elisp
-(setq ews-bibtex-directory (expand-file-name fiend/denote-lib)
+(setq ews-bibtex-directory (expand-file-name "bib_notes/" fiend/denote-lib)
       ews-bibtex-files "\\.bib\\'")
 
 (use-package bibtex
@@ -1199,7 +1199,7 @@ Denote names notes by timestamp, title and keywords, and links them by identifie
 
 ** Consult Notes
 
-Consult Notes finds notes by title and metadata (=C-c w f=) and searches their contents (=C-c w d g=, also =SPC p g=). Content search covers the whole Denote directory, so it reaches both =pkb/= and =notes/=, and needs ripgrep on the path.
+Consult Notes finds notes by title and metadata (=C-c w f=) and searches their contents (=C-c w d g=, also =SPC p g=). Content search covers the whole Denote directory, so it reaches both =pkb/= and =bib_notes/=, and needs ripgrep on the path.
 
 #+begin_src elisp
 (use-package consult-notes
@@ -1218,6 +1218,7 @@ Citar Denote ties bibliographic notes to bibliography entries through a =#+refer
 (use-package citar-denote
   :custom
   (citar-open-always-create-notes t)
+  (citar-denote-subdir "bib_notes")
   :init
   (citar-denote-mode)
   :bind
@@ -1262,7 +1263,7 @@ Local helpers in =fiend_tools/= and below move captured items into the PKB. =SPC
 
 =SPC p f= cuts the subtree at point and files it into an existing note as a new top-level heading tagged =:new:=, which marks it as not yet triaged. =SPC p n= cuts the subtree, uses its heading as the title and creates a new note in =pkb/=, prompting for keywords and writing them to both the filename and the front matter. =SPC p v= transcribes a video to an =.srt= file in =pkb/refs/= with Whisper in a conda environment, asynchronously, so the transcript becomes searchable. =M-x fiend/pkb-promote= runs =promote-idea.py= on the current note: without a prefix argument it prints the plan and the reference checks and writes nothing; with =C-u= it copies the note and everything it touches into a new project folder under =works/=.
 
-Plain =org-refile= (=C-c C-w=) targets the top level of PKB notes only, shows headline text without paths, and inserts new items first in =pkb/= files. The refile targets deliberately exclude =notes/=.
+Plain =org-refile= (=C-c C-w=) targets the top level of PKB notes only, shows headline text without paths, and inserts new items first in =pkb/= files. The refile targets deliberately exclude =bib_notes/=.
 
 #+begin_src elisp
 (add-to-list 'load-path (expand-file-name "fiend_tools" user-emacs-directory))

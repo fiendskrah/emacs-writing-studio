@@ -43,22 +43,28 @@ on branch `fiendmacs`, which is the main branch for this config.
 
 - **Dissertation writing**: org-mode as the drafting/export surface.
 - **Literature/reference management**: Zotero + Better BibTeX as source
-  of truth, surfaced via `citar` / `org-cite`. `citar-notes-paths` (in
-  `custom.el`) points at `notes/`.
-- **Research notes (PKB)**: Denote-based, root `~/jdp/denote-lib/`.
-  `~/jdp` itself is a symlink to `/Users/fiend/acropolis/jdp` (confirmed
-  2026-09-02 — not `denote-lib` individually, the whole `jdp` directory),
-  split into two sibling dirs distinguished by Denote keyword:
+  of truth, surfaced via `citar` / `org-cite`. Bib notes are found by
+  the `bib` keyword under `denote-directory` (`citar-notes-paths` in `custom.el` is inert).
+- **Research notes (PKB)**: Denote-based, root `~/acropolis/denote-library/`
+  (moved there 2026-10-23 from `~/acropolis/jdp/denote-lib`, reached as
+  `~/jdp/denote-lib` through a forwarding symlink kept for about 30 days;
+  the path is written once, as `fiend/denote-lib` in the Foundations
+  chapter), split into sibling dirs distinguished by Denote keyword:
   - `pkb/` — keyword `pkb` + topic keywords (`academia_pkb`,
     `tool_writing_pkb`); created via `denote-org-capture` or
     `fiend/pkb-extract-subtree-to-note`.
-  - `notes/` — keyword `bib`, one note per paper; created/opened via
+  - `bib_notes/` (renamed from `notes/` 2026-10-23) — keyword `bib`, one note per paper, plus the Better BibTeX export `full_lib.bib`; created/opened via
     `citar-denote` (`citar-denote-open-note`), linked via
     `#+reference: <citekey>` front matter.
   - Both dirs hold stable symlinks (`access.org`, `assets.org`) pointing
     at real timestamped files elsewhere. Any directory-glob function
     over these dirs must exclude them with
     `seq-remove #'file-symlink-p`, or headlines get double-counted.
+  - `works/` — promoted projects, each its own git repo (frozen copies of
+    notes share Denote IDs with live ones, so `denote-excluded-directories-regexp`
+    hides `works/` from Denote). Stage keywords `ideation`, `paper`, `relic`;
+    priority keywords `p1`-`p3`; agenda view `C-c a i`. Design:
+    `~/acropolis/manager/capture-design-recommendation.md`.
   - **No placeholder notes**: don't pre-create a blank note for every
     citekey. Track unread items via the bare citekey in TODO items;
     only run `citar-create-note` / `citar-denote-create-note` once a
@@ -72,13 +78,13 @@ on branch `fiendmacs`, which is the main branch for this config.
     `finances.org`). **Personal/life-admin organization within pkb is an
     acknowledged unsettled area** — the structure was built around
     bibliographic notes and personal content is being fit in post-hoc; the
-    user is also unsure `~/jdp` is denote-lib's permanent home. Ask rather
+    the library's home was settled 2026-10-23 (`~/acropolis/denote-library`). Ask rather
     than assume placement for this kind of content; don't treat any single
     filing decision as a fixed convention yet.
   - **Full-text search**: `consult-notes-search-in-all-notes`, bound both
     at `C-c w d g` and `SPC p g` (hydra-pkb, added 2026-09-03) — searches
     note *contents* across all of `denote-directory` (both `pkb/` and
-    `notes/`), the fallback for when title/tag pickers (`SPC p p` /
+    `bib_notes/`), the fallback for when title/tag pickers (`SPC p p` /
     `SPC p t`) don't find it. Needs `ripgrep` on PATH (`consult-notes-use-rg`
     defaults `t`); installed via Homebrew 2026-09-03, confirmed working.
 - **Task management**: `org-agenda` is the primary work-management
@@ -90,12 +96,12 @@ on branch `fiendmacs`, which is the main branch for this config.
     ```elisp
     (setq org-agenda-files (append fiend/base-agenda-files (fiend/pkb-org-files)))
     ```
-    `fiend/bib-org-files` (globs `notes/`, the 175 bibliographic/
+    `fiend/bib-org-files` (globs `bib_notes/`, the 175 bibliographic/
     citar-denote files) was dropped from the append 2026-09-21 — those
     notes are meant to hold personal thoughts on a source, not be a
     second home for standalone TODOs. The function is left defined but
     unused, a one-line toggle back on if needed.
-  - `org-refile-targets` is **deliberately not** extended to `notes/` —
+  - `org-refile-targets` is **deliberately not** extended to `bib_notes/` —
     only references `fiend/pkb-org-files`, keeping project-task refiling
     separate from the pkb/notes split.
   - TODO keyword sequences (two independent sequences — note `DEADLINE`
@@ -172,7 +178,7 @@ on branch `fiendmacs`, which is the main branch for this config.
 
 **Working**: tangle-then-restart workflow; Denote PKB split with symlink
 exclusion; citar/citar-denote/org-cite workflow incl. no-placeholder
-policy; org-agenda-files assembly (`notes/` dropped 2026-09-21 — see
+policy; org-agenda-files assembly (`bib_notes/` dropped 2026-09-21 — see
 below); TODO keyword sequences; org export (`C-c C-e`, confirmed working
 inside org buffers); PKB full-text search
 (`consult-notes-search-in-all-notes`, fixed 2026-09-03 by installing

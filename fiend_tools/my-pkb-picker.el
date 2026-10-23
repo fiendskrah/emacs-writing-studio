@@ -5,7 +5,7 @@
 (require 'tabulated-list)
 
 ;; --- paths & tiny utils -----------------------------------------------------
-(defvar my/pkb-dir (expand-file-name "pkb/" (if (boundp 'fiend/denote-lib) fiend/denote-lib "~/jdp/denote-lib/"))
+(defvar my/pkb-dir (expand-file-name "pkb/" (if (boundp 'fiend/denote-lib) fiend/denote-lib "~/acropolis/denote-library/"))
   "Directory containing PKB notes.")
 
 (defun my/pkb--join (xs) (if xs (mapconcat #'identity xs " + ") ""))

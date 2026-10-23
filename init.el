@@ -21,8 +21,8 @@
 
 (keymap-global-set "C-c w v" 'customize-variable)
 
-(defvar fiend/denote-lib "~/jdp/denote-lib/"
-  "Root of the Denote library: pkb/, notes/ and the .bib files.")
+(defvar fiend/denote-lib "~/acropolis/denote-library/"
+  "Root of the Denote library: pkb/, bib_notes/ and works/.")
 
 (setopt denote-directory (expand-file-name fiend/denote-lib))
 
@@ -612,7 +612,7 @@ week agenda (custom \"a\" command), not as a banner on every day."
 (defun fiend/bib-org-files ()
   "Real (non-symlink, non-lockfile) bibliographic notes. Currently unused."
   (seq-remove #'file-symlink-p
-              (directory-files (expand-file-name "notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
+              (directory-files (expand-file-name "bib_notes/" fiend/denote-lib) t "^[^.#].*\\.org\\'")))
 
 (defun fiend/refresh-agenda-files (&rest _)
   "Recompute `org-agenda-files' from the base list plus current pkb/ contents."
@@ -811,7 +811,7 @@ Returns 0 if the file or heading can't be found."
   (evil-define-key '(normal motion) dashboard-mode-map
     (kbd "A") #'fiend/dashboard-jump-to-super-agenda))
 
-(setq ews-bibtex-directory (expand-file-name fiend/denote-lib)
+(setq ews-bibtex-directory (expand-file-name "bib_notes/" fiend/denote-lib)
       ews-bibtex-files "\\.bib\\'")
 
 (use-package bibtex
@@ -889,6 +889,7 @@ Returns 0 if the file or heading can't be found."
 (use-package citar-denote
   :custom
   (citar-open-always-create-notes t)
+  (citar-denote-subdir "bib_notes")
   :init
   (citar-denote-mode)
   :bind
