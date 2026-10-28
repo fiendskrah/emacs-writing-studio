@@ -229,7 +229,8 @@
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
-(scroll-bar-mode -1)
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
 
 (setq use-short-answers t)
 
@@ -973,7 +974,7 @@ transcript in pkb/refs/, timestamped and searchable via
 `consult-notes-search-in-all-notes' since refs/ sits inside
 denote-directory. Runs async - transcription of a lecture-length video
 takes minutes, and shouldn't block Emacs while it runs."
-  (interactive (list (read-file-name "Video file: " "~/jdp/media/")))
+  (interactive (list (read-file-name "Video file: " "~/acropolis/media/")))
   (let* ((outdir (expand-file-name "pkb/refs/" fiend/denote-lib))
          (default-directory outdir))
     (async-shell-command
@@ -1061,6 +1062,9 @@ The heading text becomes the title; everything else is inserted as-is."
 (use-package emacs
   :custom
   (image-dired-external-viewer "gimp")
+  :init
+  (require 'image-mode)
+  (require 'dired)
   :bind
   ((:map image-mode-map
          ("k" . image-kill-buffer)
@@ -1082,6 +1086,7 @@ The heading text becomes the title; everything else is inserted as-is."
   (large-file-warning-threshold (* 50 (expt 2 20))))
 
 (use-package pdf-tools
+  :if (or (display-graphic-p) (daemonp))
   :config
   (pdf-tools-install)
   (setq pdf-view-display-size 'fit-page)
@@ -1102,6 +1107,7 @@ The heading text becomes the title; everything else is inserted as-is."
     (pdf-view-midnight-minor-mode (if night 1 -1))))
 
 (use-package pdf-tools
+  :if (or (display-graphic-p) (daemonp))
   :defer t
   :config
   (pdf-tools-install :no-query)
