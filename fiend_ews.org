@@ -324,7 +324,7 @@ Which Key lists the continuations of a partial key sequence after a short idle d
 
 ** Frame and display
 
-The frame is kept minimal: no tool bar, menu bar or scroll bar, and single-key answers to yes-or-no prompts. Line numbers are relative and the column number is shown. The frame starts maximized rather than fullscreen, which sizes to the visible work area instead of the full screen. =ESC= quits prompts and minibuffers in one press.
+The frame is kept minimal: no tool bar, menu bar or scroll bar (the scroll bar call is skipped in a terminal-only Emacs, which does not define it), and single-key answers to yes-or-no prompts. Line numbers are relative and the column number is shown. The frame starts maximized rather than fullscreen, which sizes to the visible work area instead of the full screen. =ESC= quits prompts and minibuffers in one press.
 
 #+begin_src elisp
 (column-number-mode)
@@ -340,7 +340,8 @@ The frame is kept minimal: no tool bar, menu bar or scroll bar, and single-key a
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
-(scroll-bar-mode -1)
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
 
 (setq use-short-answers t)
 #+end_src
@@ -1426,12 +1427,15 @@ Recentf remembers the last fifty files and opens the list with =C-c w r=. Bookma
 
 ** Images
 
-Image mode steps through a directory with the arrow keys and kills the buffer with =k=. =C-RET= in Dired opens an image in GIMP, and Image-Dired builds thumbnails from a Dired buffer (=C-c w I=).
+Image mode steps through a directory with the arrow keys and kills the buffer with =k=. Image mode and Dired are loaded first, because the key maps must exist before they are bound, and a terminal-only Emacs does not preload Image mode. =C-RET= in Dired opens an image in GIMP, and Image-Dired builds thumbnails from a Dired buffer (=C-c w I=).
 
 #+begin_src elisp
 (use-package emacs
   :custom
   (image-dired-external-viewer "gimp")
+  :init
+  (require 'image-mode)
+  (require 'dired)
   :bind
   ((:map image-mode-map
          ("k" . image-kill-buffer)
@@ -1461,10 +1465,11 @@ Doc View renders office documents and DjVu through external converters at 300 dp
 
 ** PDF Tools
 
-PDF Tools is the main PDF viewer, fitted to the page. In Normal state =n=, =p=, =j=, =k=, =gg= and =G= move by page and line. PDFs open in midnight colours between 18:00 and 07:00, and =M-d= toggles it by hand.
+PDF Tools is the main PDF viewer, fitted to the page. In Normal state =n=, =p=, =j=, =k=, =gg= and =G= move by page and line. PDFs open in midnight colours between 18:00 and 07:00, and =M-d= toggles it by hand. PDF Tools is only set up in a graphical frame or a daemon; a terminal Emacs skips it, because it cannot draw pages and would stop to ask about building its server.
 
 #+begin_src elisp
 (use-package pdf-tools
+  :if (or (display-graphic-p) (daemonp))
   :config
   (pdf-tools-install)
   (setq pdf-view-display-size 'fit-page)
@@ -1485,6 +1490,7 @@ PDF Tools is the main PDF viewer, fitted to the page. In Normal state =n=, =p=, 
     (pdf-view-midnight-minor-mode (if night 1 -1))))
 
 (use-package pdf-tools
+  :if (or (display-graphic-p) (daemonp))
   :defer t
   :config
   (pdf-tools-install :no-query)

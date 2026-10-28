@@ -76,5 +76,7 @@ Claude memory `capture-decisions-2026-10-22`.
   `~/acropolis/jdp/fiend_ews.org`, `jdp/pkb-parser.el`), `jdp/written-quals/day2.run.xml`.
 - Optional Zotero cleanup: 11 dead annotation attachments, `carruthers.pdf`, 56
   orphan files on Drive, 394 group-library PDFs not on Drive.
-- Open design questions: tag taxonomy beyond the above; personal versus professional
-  task organization.
+- Design questions closed 2026-10-26 (Dylan): tag taxonomy frozen as above (stage +
+  priority only); personal and professional tasks share one agenda for now, and
+  `~/acropolis/personal/` is ignored. Capture templates stay on hold. Revisit only if
+  he raises it.
