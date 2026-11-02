@@ -388,7 +388,7 @@ The Modus themes are configured with italic and bold constructs and mixed fonts 
 
 ** Doom Modeline
 
-Doom Modeline replaces the stock mode line. Its icons come from Nerd Icons, whose font is installed once with =nerd-icons-install-fonts=. The file name is shown from the project root (=truncate-with-project=). Files in the PKB are shown by title alone: =fiend/mode-line-slug= drops the Denote timestamp, optional signature and =__keywords= from the displayed name, so =20260109T154328--home-server__homeserver_hub.org= reads =home-server.org=. Only the display changes, never the file. Names that are not Denote names, or have no title, pass through unchanged. Doom Modeline calls the function through =doom-modeline-buffer-file-name-function=. The bar also shows a word count in Org buffers (the selection's count while text is highlighted), the total line count beside the current line, and the clock from =display-time-mode=.
+Doom Modeline replaces the stock mode line. Its icons come from Nerd Icons, whose font is installed once with =nerd-icons-install-fonts=. The file name is shown from the project root (=truncate-with-project=). Files in the PKB are shown by title alone: =fiend/mode-line-slug= drops the Denote timestamp, optional signature and =__keywords= from the displayed name, so =20260109T154328--home-server__homeserver_hub.org= reads =home-server.org=. Only the display changes, never the file. Names that are not Denote names, or have no title, pass through unchanged. Doom Modeline calls the function through =doom-modeline-buffer-file-name-function=. The word count is off (=doom-modeline-enable-word-count nil=): it recounted the whole buffer on every redisplay and made typing lag in large Org papers, so use =M-== (=count-words-region=) on demand. The bar shows the total line count beside the current line, and the clock from =display-time-mode=.
 
 #+begin_src elisp
 (defconst fiend/mode-line-denote-regexp
@@ -408,7 +408,7 @@ Doom Modeline replaces the stock mode line. Its icons come from Nerd Icons, whos
   (doom-modeline-buffer-file-name-style 'truncate-with-project)
   (doom-modeline-buffer-file-name-function #'fiend/mode-line-slug)
   (doom-modeline-height 28)
-  (doom-modeline-enable-word-count t)
+  (doom-modeline-enable-word-count nil)
   (doom-modeline-total-line-number t))
 
 (display-time-mode 1)

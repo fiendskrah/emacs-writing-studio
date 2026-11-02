@@ -13,7 +13,7 @@ the bottom bar. Config lives in `fiend_ews.org`, Interface chapter, section
   (doom-modeline-buffer-file-name-style 'truncate-with-project)
   (doom-modeline-buffer-file-name-function #'fiend/mode-line-slug)
   (doom-modeline-height 28)
-  (doom-modeline-enable-word-count t)
+  (doom-modeline-enable-word-count nil)
   (doom-modeline-total-line-number t))
 (display-time-mode 1)
 ```
@@ -30,8 +30,10 @@ the bottom bar. Config lives in `fiend_ews.org`, Interface chapter, section
   `doom-modeline-buffer-file-name-function`, which receives the full path and
   returns the replacement; only the last component is rewritten. Tested on
   sample names (keywords, no keywords, signature, no title, plain files).
-- **Added by Dylan's choice**: word count (Org/Markdown, selection count while
-  text is highlighted), total line count (`12/340`), clock.
+- **Added by Dylan's choice**: total line count (`12/340`), clock. Word count was
+  on until 2026-11-02, then turned off (`doom-modeline-enable-word-count nil`): it
+  recounted the whole buffer every redisplay and lagged typing in large Org papers
+  (profiler: 64% CPU). Use `M-=` instead.
 - Replaced the stock Emacs bar. Doom Modeline was installed but unloaded before;
   no rationale was ever recorded for that.
 
